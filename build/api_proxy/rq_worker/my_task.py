@@ -1,14 +1,14 @@
 import time
 from rq import get_current_job
-def example(seconds):
+def hull_white(sigma, shift, period):
     job = get_current_job()
     print('Starting task')
+    period = int(period)
     answ = 0
-    for i in range(seconds):
-        job.meta['progress'] = 100.0 * i / seconds
+    
+    for i in range(period):
+        job.meta['progress'] = 100.0 * i / period
         job.save_meta()
-        print(i)
-        time.sleep(1)
         answ += i
     
     print('Task completed')

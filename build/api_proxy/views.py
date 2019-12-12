@@ -18,15 +18,19 @@ def delete_worker():
 
 class AddTask(Resource):
     def post(self):
+        sigma = request.form.get('sigma',0)
+        shift = request.form.get('shift',0)
+        period = request.form.get('period',0)
         workers = rq.Worker.all(queue=rq.Queue('hull_white_task', connection=Redis.from_url('redis://127.0.0.1:6379')))
-        
+        print(len(workers))
         if len(workers) < 5:
             print(len(workers))
-            proc = subprocess.Popen(['gnome-terminal --working-directory=/home/yaroslav/Task2WithoutDocker/build/rq_worker -x  rq worker hull_white_task'], shell=True)
+            proc = subprocess.Popen(['gnome-terminal --working-directory=/home/yaroslav/Task2WithoutDocker/Web2/build/api_proxy/rq_worker -x  rq worker hull_white_task'], shell=True)
                  
         queue = rq.Queue('hull_white_task', connection=Redis.from_url('redis://127.0.0.1:6379'))
-        job = queue.enqueue('task.example', 20,result_ttl=20)
+        job = queue.enqueue('my_task.hull_white', sigma, shift, period,result_ttl=20)
         JOB_IDS.add(job.id)
+
         #delete_worker()
         return jsonify({'id':job.id})
 
@@ -42,9 +46,11 @@ class LogIn(Resource):
         print(request.form)
         email = request.form['email']
         password = request.form['password']
+        print(email)
         try:
+            print(password)
             user = User.query.filter_by(email=email).first()
-            print(user)
+            print(user.password)
             if password != user.password:
                 return 403
             print(User.encode_auth_token(user.id))
